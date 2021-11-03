@@ -1,0 +1,7 @@
+.page-level-alert {
+  z-index: 1600 !important;
+  right: 0;
+  bottom: 0;
+  top: unset !important;
+  left: unset !important;
+}
