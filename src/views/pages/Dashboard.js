@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
-import reactFeature from '../../assets/images/react-feature.svg';
-import sassFeature from '../../assets/images/sass-feature.svg';
-import bootstrapFeature from '../../assets/images/bootstrap-feature.svg';
-import responsiveFeature from '../../assets/images/responsive-feature.svg';
+// import reactFeature from '../../assets/images/react-feature.svg';
+// import sassFeature from '../../assets/images/sass-feature.svg';
+// import bootstrapFeature from '../../assets/images/bootstrap-feature.svg';
+// import responsiveFeature from '../../assets/images/responsive-feature.svg';
 import DatePicker from 'react-datepicker';
 import './../../assets/styles/custom-styles.css';
 import 'react-datepicker/dist/react-datepicker.css';
 import {
-  Card,
-  CardBody,
-  Col,
   Table,
   Button,
   Modal,
@@ -20,13 +17,13 @@ import {
   FormGroup,
   Label,
   Input,
-  FormText,
   FormFeedback,
-  Alert,
   ListGroup,
   ListGroupItem,
 } from 'reactstrap';
 import PageAlertContext from '../../vibe/components/PageAlert/PageAlertContext';
+import { v4 as uuidv4 } from 'uuid';
+
 class Dashboard extends Component {
   initialState = {
     alertMsg: '',
@@ -57,6 +54,7 @@ class Dashboard extends Component {
     experienceValid: false,
 
     formValid: false,
+    customField: '',
   };
   constructor(props) {
     super(props);
@@ -71,10 +69,10 @@ class Dashboard extends Component {
 
     this.toggleSend = this.toggleSend.bind(this);
     this.toggleEdit = this.toggleEdit.bind(this);
+    this.addFieldHandler = this.addFieldHandler.bind(this);
   }
 
   handleUserInput = e => {
-    console.log(e);
     const name = e.target.name;
     const value = e.target.value;
     this.setState({ [name]: value }, () => {
@@ -142,7 +140,6 @@ class Dashboard extends Component {
         break;
       case 'birthday':
         birthdayValid = value instanceof Date;
-        // console.log(value);
 
         fieldValidationErrors.birthday = value instanceof Date ? '' : 'is required';
         break;
@@ -212,13 +209,26 @@ class Dashboard extends Component {
   //     }),
   //   });
   // }
+  addFieldHandler() {
+    if (this.state.customField.trim().length > 0) {
+      this.setState(state => {
+        const fieldlist = state.fieldlist.concat(state.customField);
+
+        return {
+          fieldlist: fieldlist,
+          customField: '',
+        };
+      });
+    }
+  }
   async SendRequest() {
     try {
       await this.postUsers();
       this.setStateAlert('Request succeeded', 'success');
+      this.toggleSend();
       // this.toggleSend();
     } catch (error) {
-      this.setStateAlert(`Request failed, ${error}`);
+      this.setStateAlert(`Request failed, ${error}`, 'danger');
       // onError(error);
     }
   }
@@ -247,10 +257,10 @@ class Dashboard extends Component {
               <td>1</td>
               <td>Applying for a job</td>
               <td>
-                <Button color="primary" onClick={this.toggleEdit}>
+                <Button className="btn btn-primary mb-2" color="primary" onClick={this.toggleEdit}>
                   Edit
                 </Button>{' '}
-                <Button color="primary" onClick={this.toggleSend}>
+                <Button className="btn btn-primary mb-2" color="primary" onClick={this.toggleSend}>
                   Send
                 </Button>
               </td>
@@ -322,17 +332,6 @@ class Dashboard extends Component {
                   invalid={this.errorClass(this.state.formErrors.birthday)}
                 />
                 <FormFeedback>{this.state.formErrors.birthday}</FormFeedback>
-                {/* <DatePicker
-                  name="birthday"
-                  className="form-control"
-                  id="birthday"
-                  value={this.state.date}
-                  // selected={this.state.birthdayField}
-                  // onBlur={e => this.validation(e.target)}
-                  // onChange={birthdayField => this.setState({ birthdayField })}
-                  dateFormat="dd/MM/yyyy"
-                  onChange={this.handleUserInput}
-                /> */}
               </FormGroup>{' '}
               <FormGroup>
                 <Label for="exampleFile">Profile image</Label>
@@ -385,17 +384,15 @@ class Dashboard extends Component {
                   {' '}
                   <Button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary "
                     color="primary"
                     disabled={!this.state.formValid}
                     onClick={() => {
                       this.SendRequest().then(() => {
-                        console.log(context);
                         context.setAlert(this.state.alertMessage, this.state.alertType);
                         setTimeout(() => {
                           context.closeAlert();
                         }, 3000);
-                        this.toggleSend();
                       });
                     }}
                   >
@@ -412,20 +409,31 @@ class Dashboard extends Component {
         <Modal isOpen={this.state.editModal} toggle={this.toggleEdit}>
           <ModalHeader toggle={this.toggleEdit}>Edit Applying for a job request</ModalHeader>
           <ModalBody>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-            dolore magna aliqua.{' '}
+            <h3>Request field list</h3>
             <ListGroup>
               {this.state.fieldlist.map(field => (
-                <ListGroupItem>{field}</ListGroupItem>
+                <ListGroupItem key={uuidv4()}>{field}</ListGroupItem>
               ))}
             </ListGroup>{' '}
-            <Button color="primary" onClick={this.toggleEdit} className="mt-2">
-              Do Something
+            <FormGroup className="mt-2">
+              <Label for="customField">Add field</Label>
+              <Input
+                type="text"
+                name="customField"
+                id="customField"
+                value={this.state.customField}
+                onChange={this.handleUserInput}
+                // invalid={this.errorClass(this.state.formErrors.firstName)}
+              />{' '}
+              <FormFeedback>{this.state.formErrors.firstName}</FormFeedback>
+            </FormGroup>
+            <Button color="primary" onClick={this.addFieldHandler} className="mt-2">
+              Add field
             </Button>{' '}
           </ModalBody>
           <ModalFooter>
             <Button color="secondary" onClick={this.toggleEdit}>
-              Cancel
+              Close
             </Button>
           </ModalFooter>
         </Modal>{' '}
