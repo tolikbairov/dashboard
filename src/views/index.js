@@ -1,4 +1,5 @@
 import Dashboard from './pages/Dashboard';
+import Account from './pages/Account';
 import Buttons from './elements/Buttons';
 import Alerts from './elements/Alerts';
 import Grid from './elements/Grid';
@@ -138,6 +139,11 @@ const pageList = [
     name: 'Widgets',
     path: '/widgets',
     component: Widgets,
+  },
+  {
+    name: 'Account',
+    path: '/account',
+    component: Account,
   },
 ];
 
